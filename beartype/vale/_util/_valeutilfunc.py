@@ -12,13 +12,13 @@ This private submodule is *not* intended for importation by downstream callers.
 
 # ....................{ IMPORTS                            }....................
 from beartype.roar import BeartypeValeSubscriptionException
-from beartype.vale._util._valeutiltyping import BeartypeValidatorTester
+from beartype.vale._util._valeutiltyping import BeartypeUnaryValidatorTester
 from beartype._util.func.arg.utilfuncargtest import (
     die_unless_func_args_len_flexible_equal)
 
 # ....................{ FORMATTERS                         }....................
-def die_unless_validator_tester(
-    validator_tester: BeartypeValidatorTester) -> None:
+def die_unless_unary_validator_tester(
+    validator_tester: BeartypeUnaryValidatorTester) -> None:
     '''
     Raise an exception unless the passed object is a **validator tester** (i.e.,
     caller-defined callable accepting a single arbitrary object and returning

@@ -21,8 +21,8 @@ from beartype.roar import (
 )
 from beartype.typing import Protocol
 from beartype.vale._is._valeisabc import _BeartypeValidatorFactoryABC
-from beartype.vale._core._valecore import BeartypeValidator
-from beartype.vale._util._valeutilfunc import die_unless_validator_tester
+from beartype.vale._core._valecore import BeartypeValidator, BeartypeUnaryValidator
+from beartype.vale._util._valeutilfunc import die_unless_unary_validator_tester
 from beartype.vale._util._valeutiltyping import BeartypeValidatorTester
 from beartype._data.hint.datahinttyping import LexicalScope
 from beartype._util.func.utilfuncscope import add_func_scope_attr
@@ -284,7 +284,7 @@ class _IsFactory(_BeartypeValidatorFactoryABC):
 
     # ..................{ DUNDERS                            }..................
     def __getitem__(  # type: ignore[override]
-        self, is_valid: BeartypeValidatorTester) -> BeartypeValidator:
+        self, is_valid: BeartypeValidatorTester) -> BeartypeUnaryValidator:
         '''
         Create and return a new beartype validator from the passed **validator
         callable** (i.e., caller-defined callable accepting a single arbitrary
@@ -331,7 +331,7 @@ class _IsFactory(_BeartypeValidatorFactoryABC):
         # Else, this class was subscripted by exactly one argument.
 
         # If that callable is *NOT* a validator tester, raise an exception.
-        die_unless_validator_tester(is_valid)
+        die_unless_unary_validator_tester(is_valid)
         # Else, that callable is a validator tester.
 
         # Lambda function dynamically generating the machine-readable
@@ -560,7 +560,7 @@ class _IsFactory(_BeartypeValidatorFactoryABC):
             attr=_is_valid_bool, func_scope=is_valid_code_locals)
 
         # One one-liner to rule them all and in "pdb" bind them.
-        return BeartypeValidator(
+        return BeartypeUnaryValidator(
             is_valid=_is_valid_bool,
             # Python code snippet calling this validator (via this new
             # parameter), passed an object to be interpolated into this snippet

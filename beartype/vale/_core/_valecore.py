@@ -17,11 +17,11 @@ This private submodule is *not* intended for importation by downstream callers.
 
 # ....................{ IMPORTS                            }....................
 from beartype.roar import BeartypeValeSubscriptionException
-from beartype.vale._util._valeutilfunc import die_unless_validator_tester
+from beartype.vale._util._valeutilfunc import die_unless_unary_validator_tester
 from beartype.vale._util._valeutiltext import format_diagnosis_line
 from beartype.vale._util._valeutiltyping import (
     BeartypeValidatorTester,
-    BeartypeValidatorRepresenter,
+    BeartypeValidatorRepresenter, BeartypeUnaryValidatorTester,
 )
 from beartype._data.hint.datahinttyping import LexicalScope
 from beartype._util.func.arg.utilfuncargtest import is_func_argless
@@ -170,10 +170,6 @@ class BeartypeValidator(object):
 
         # Avoid circular import dependencies.
         from beartype.vale._is._valeisabc import _BeartypeValidatorFactoryABC
-
-        # If that callable is *NOT* a validator tester, raise an exception.
-        die_unless_validator_tester(is_valid)
-        # Else, that callable is a validator tester.
 
         # If this code is *NOT* a string, raise an exception.
         if not isinstance(is_valid_code, str):
@@ -547,3 +543,21 @@ class BeartypeValidator(object):
 
         # Closures for profound lore.
         return BeartypeValidatorNegation(validator_operand=self)
+
+
+class BeartypeUnaryValidator(BeartypeValidator):
+    __slots__ = (
+        '_get_repr',
+        '_is_valid',
+        '_is_valid_code',
+        '_is_valid_code_locals',
+    )
+
+    def __init__(self, *, is_valid: BeartypeUnaryValidatorTester, is_valid_code: str,
+                 is_valid_code_locals: LexicalScope, get_repr: BeartypeValidatorRepresenter) -> None:
+        # For the unary validator case we absolutely care that it is a properly unary validator.
+        die_unless_unary_validator_tester(is_valid)
+
+        # Then we do all the same validation as in the base class by just delegating.
+        super().__init__(is_valid=is_valid, is_valid_code=is_valid_code, is_valid_code_locals=is_valid_code_locals,
+                         get_repr=get_repr)

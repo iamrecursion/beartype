@@ -14,7 +14,10 @@ This private submodule is *not* intended for importation by downstream callers.
 # ....................{ IMPORTS                            }....................
 from beartype.typing import (
     Callable,
+    Tuple,
+    TypeVarTuple,
     Union,
+    Unpack,
 )
 
 # ....................{ HINTS                              }....................
@@ -43,13 +46,28 @@ representations are particularly slow to generate include:
 '''
 
 
-BeartypeValidatorTester = Callable[[object], bool]
+BeartypeMultiArgValidatorTester = Callable[[Unpack[Tuple[object, ...]]], bool]
+"""
+PEP-compliant type hint matching a **beartype argument validator tester** 
+(i.e., a caller-defined callable accepting an arbitrary object followed by a
+number of other arbitrary objects. IT returns either :data:`True` if that
+object satisfied an arbitrary constraint *or* :data:`False` otherwise.
+
+Beartype argument validator testers are suitable for subscripting the
+`IsArgumentative` functional beartype validator.
+"""
+
+
+BeartypeUnaryValidatorTester = Callable[[object], bool]
 '''
 PEP-compliant type hint matching a **beartype validator tester** (i.e.,
 caller-defined callable accepting a single arbitrary object and returning
 either :data:`True` if that object satisfies an arbitrary constraint *or*
-:data:`True` otherwise).
+:data:`False` otherwise).
 
 Beartype validator testers are suitable for subscripting functional beartype
 validator factories (e.g., :attr:`beartype.vale.Is`).
 '''
+
+
+BeartypeValidatorTester = BeartypeUnaryValidatorTester | BeartypeMultiArgValidatorTester
