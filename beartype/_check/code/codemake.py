@@ -158,6 +158,9 @@ from beartype._util.text.utiltextmunge import replace_str_substrs
 from beartype._util.text.utiltextrepr import represent_object
 from random import getrandbits
 
+from beartype.vale._core._valecore import BeartypeUnaryValidator
+
+
 # ....................{ MAKERS                             }....................
 @callable_cached
 def make_check_expr(
@@ -1781,19 +1784,36 @@ def make_check_expr(
                             )
                         # Else, this argument is beartype-specific.
 
-                        # Generate and append efficient code type-checking this
-                        # validator by embedding this code as is.
-                        func_curr_code += CODE_PEP593_VALIDATOR_IS_format(
-                            indent_curr=indent_curr,
-                            # Python expression formatting the current pith into
-                            # the "{obj}" variable already embedded by that
-                            # class into this code.
-                            hint_child_expr=hint_child._is_valid_code.format(
-                                # Indentation unique to this child hint.
-                                indent=INDENT_LEVEL_TO_CODE[indent_level_child],
-                                obj=pith_curr_var_name,
-                            ),
-                        )
+                        # These days we have to do something different depending on the
+                        # particular kind of validator.
+                        if isinstance(hint_child, BeartypeUnaryValidator):
+                            # Generate and append efficient code type-checking this
+                            # validator by embedding this code as is.
+                            func_curr_code += CODE_PEP593_VALIDATOR_IS_format(
+                                indent_curr=indent_curr,
+                                # Python expression formatting the current pith into
+                                # the "{obj}" variable already embedded by that
+                                # class into this code.
+                                hint_child_expr=hint_child._is_valid_code.format(
+                                    # Indentation unique to this child hint.
+                                    indent=INDENT_LEVEL_TO_CODE[indent_level_child],
+                                    obj=pith_curr_var_name,
+                                ),
+                            )
+                        else:
+                            # Here we have a more generic kind of validator, and we have
+                            # to generate specific code for that.
+                            print("EGADS A KIND OF VALIDATOR WE KNOW NOTHING ABOUT")
+                            validator_code = CODE_PEP593_VALIDATOR_IS_format(
+                                indent_curr=indent_curr,
+                                hint_child_expr=hint_child._is_valid_code.format(
+                                    indent_curr=INDENT_LEVEL_TO_CODE[indent_level_child],
+                                    obj=pith_curr_var_name
+                                )
+                            )
+
+                            func_curr_code += validator_code
+
 
                         # Generate locals safely merging the locals required by
                         # both this validator code *AND* the current code

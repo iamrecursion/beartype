@@ -87,6 +87,45 @@ def get_func_arg_first_name_or_none(
     return None
 
 # ....................{ GETTERS ~ args                     }....................
+def get_func_arg_names(
+    # TODO Doc
+    # Mandatory parameters
+    func: Codeobjable,
+
+    # Optional parameters.
+    is_unwrap: bool = True,
+    exception_cls: TypeException = _BeartypeUtilCallableException,
+    exception_prefix: str = '',
+) -> list[str]:
+    # Avoid circular import dependencies.
+    from beartype._util.api.utilapifunctools import (
+        get_func_functools_partial_args_flexible_len,
+        is_func_functools_partial,
+    )
+
+    # Code object underlying the passed pure-Python callable unwrapped if any
+    # *OR* "None" otherwise (i.e., that callable has *NO* code object).
+    func_codeobj = get_func_codeobj_or_none(func=func, is_unwrap=is_unwrap)
+
+    # If that callable has a code object, return the number of flexible
+    # parameters accepted by this callable exposed by this code object.
+    if func_codeobj:
+        # The `co_varnames` attribute is guaranteed to list the function
+        # arguments first. This means we can trim off the first n names
+        # to get the function argument names.
+        arg_names = func_codeobj.co_varnames
+        return [arg_names[i] for i in range(func_codeobj.co_argcount)]
+    # Else, that callable has *NO* code object.
+
+    # If that callable is *NOT* actually callable, raise an exception.
+    if not callable(func):
+        raise exception_cls(f'{exception_prefix}{repr(func)} uncallable.')
+    # Else, that callable is callable.
+
+    # TODO: Deal with partials and callable objects.
+
+    pass
+
 def get_func_args_flexible_len(
     # Mandatory parameters.
     func: Codeobjable,

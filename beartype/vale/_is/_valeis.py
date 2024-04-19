@@ -13,7 +13,7 @@ entire :mod:`beartype` validation ecosystem.
 
 This private submodule is *not* intended for importation by downstream callers.
 '''
-
+from beartype._util.func.arg.utilfuncargget import get_func_arg_names
 # ....................{ IMPORTS                            }....................
 from beartype.roar import (
     BeartypeValeLambdaWarning,
@@ -552,6 +552,8 @@ class _IsFactory(_BeartypeValidatorFactoryABC):
         # referenced in the "is_valid_code" snippet defined below.
         is_valid_code_locals: LexicalScope = {}
 
+        all_args = get_func_arg_names(is_valid)
+
         # Name of a new parameter added to the signature of each
         # @beartype-decorated wrapper function whose value is this validator,
         # enabling this validator to be called directly in the body of those
@@ -568,4 +570,5 @@ class _IsFactory(_BeartypeValidatorFactoryABC):
             is_valid_code=f'{is_valid_attr_name}({{obj}})',
             is_valid_code_locals=is_valid_code_locals,
             get_repr=get_repr,
+            is_valid_target_arg_name=all_args[0]
         )

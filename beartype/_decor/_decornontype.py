@@ -297,6 +297,8 @@ def beartype_func(
     # Release this beartype call metadata back to its object pool.
     release_object_typed(bear_call)
 
+    # TODO: Inspecting this wrapper is very useful.
+
     # Return this wrapper.
     return func_wrapper  # type: ignore[return-value]
 

@@ -115,6 +115,93 @@ def die_unless_func_args_len_flexible_equal(
     # Else, this callable accepts exactly this number of flexible parameters.
 
 
+def die_unless_func_args_len_flexible_greater_or_equal(
+        # Mandatory parameters.
+        func: Codeobjable,
+        func_args_len_flexible: int,
+
+        # Optional parameters.
+        is_unwrap: bool = True,
+        exception_cls: TypeException = _BeartypeUtilCallableException,
+        exception_prefix: str = '',
+) -> None:
+    '''
+    Raise an exception unless the passed pure-Python callable accepts the passed
+    number of **flexible parameters** (i.e., parameters passable as either
+    positional or keyword arguments) or greater.
+
+    Parameters
+    ----------
+    func : Codeobjable
+        Pure-Python callable, frame, or code object to be inspected.
+    func_args_len_flexible : int
+        The minimum number of flexible parameters to validate this callable as
+        accepting.
+    is_unwrap: bool, optional
+        :data:`True` only if this validator implicitly calls the
+        :func:`beartype._util.func.utilfuncwrap.unwrap_func_all` function to
+        unwrap this possibly higher-level wrapper into its possibly lowest-level
+        wrappee *before* returning the code object of that wrappee. Note that
+        doing so incurs worst-case time complexity :math:`O(n)` for :math:`n`
+        the number of lower-level wrappees wrapped by this wrapper. Defaults to
+        :data:`True` for robustness. Why? Because this validator *must* always
+        introspect lowest-level wrappees rather than higher-level wrappers. The
+        latter typically do *not* accurately replicate the signatures of the
+        former. In particular, decorator wrappers typically wrap decorated
+        callables with variadic positional and keyword parameters (e.g., ``def
+        _decorator_wrapper(*args, **kwargs)``). Since neither constitutes a
+        flexible parameter, this validator raises an exception when passed such
+        a wrapper with this boolean set to :data:`False`. Only set this boolean
+        to :data:`False` if you pretend to know what you're doing.
+    exception_cls : type, optional
+        Type of exception to be raised. Defaults to
+        :class:`._BeartypeUtilCallableException`.
+    exception_prefix : str, optional
+        Human-readable label prefixing this exception message. Defaults to the
+        empty string.
+
+    Raises
+    ------
+    exception_cls
+        If this callable either:
+
+        * Is *not* callable.
+        * Is callable but is *not* pure-Python.
+        * Is a pure-Python callable accepting either more or less than this
+          Number of flexible parameters.
+    '''
+    assert isinstance(func_args_len_flexible, int)
+
+    # Avoid circular import dependencies.
+    from beartype._util.func.arg.utilfuncargget import (
+        get_func_args_flexible_len)
+
+    # Number of flexible parameters accepted by this callable.
+    func_args_len_flexible_actual = get_func_args_flexible_len(
+        func=func,
+        is_unwrap=is_unwrap,
+        exception_cls=exception_cls,
+        exception_prefix=exception_prefix,
+    )
+
+    # If this callable accepts more or less than this number of flexible
+    # parameters, raise an exception.
+    if func_args_len_flexible_actual < func_args_len_flexible:
+        assert isinstance(exception_cls, type), (
+            f'{repr(exception_cls)} not class.')
+        assert isinstance(exception_prefix, str), (
+            f'{repr(exception_prefix)} not string.')
+
+        raise exception_cls(
+            f'{exception_prefix}callable {repr(func)} flexible argument count '
+            f'{func_args_len_flexible_actual} != {func_args_len_flexible} '
+            f'(i.e., {repr(func)} accepts {func_args_len_flexible_actual} '
+            f'rather than {func_args_len_flexible} positional and/or keyword '
+            f'parameters).'
+        )
+    # Else, this callable accepts exactly this number of flexible parameters.
+
+
 #FIXME: Uncomment as needed.
 # def die_unless_func_argless(
 #     # Mandatory parameters.

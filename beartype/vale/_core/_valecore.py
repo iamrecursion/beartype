@@ -102,6 +102,8 @@ class BeartypeValidator(object):
         is_valid_code: str,
         is_valid_code_locals: LexicalScope,
         get_repr: BeartypeValidatorRepresenter,
+        is_valid_target_arg_name: str,
+        is_valid_remaining_arg_names: list[str]
     ) -> None:
         '''
         Initialize this validator from the passed metadata.
@@ -554,10 +556,10 @@ class BeartypeUnaryValidator(BeartypeValidator):
     )
 
     def __init__(self, *, is_valid: BeartypeUnaryValidatorTester, is_valid_code: str,
-                 is_valid_code_locals: LexicalScope, get_repr: BeartypeValidatorRepresenter) -> None:
+                 is_valid_code_locals: LexicalScope, get_repr: BeartypeValidatorRepresenter, is_valid_target_arg_name: str) -> None:
         # For the unary validator case we absolutely care that it is a properly unary validator.
         die_unless_unary_validator_tester(is_valid)
 
         # Then we do all the same validation as in the base class by just delegating.
         super().__init__(is_valid=is_valid, is_valid_code=is_valid_code, is_valid_code_locals=is_valid_code_locals,
-                         get_repr=get_repr)
+                         get_repr=get_repr, is_valid_target_arg_name= is_valid_target_arg_name, is_valid_remaining_arg_names=[])
